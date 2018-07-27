@@ -1,0 +1,211 @@
+<!-- <div class="right_col" ng-controller="requirement223 as r223" ng-app="myApp">
+  <div class="row">
+    <div class="col-md-6 col-sm-6 col-xs-6">
+
+    </div>
+    <div class="col-md-6 col-sm-6 col-xs-6" ng-repeat="x in r223.products">
+      <div class="title">
+        <h3>{{x}}</h3>
+      </div>
+      <div class="form-group">
+        <label for="from_when">From (UTC) </label>
+        <input type="text" class="" id="from_when" name="from_when" size="" ng-model="time.from_when" />
+
+        <label for="to_when">To (UTC) </label>
+        <input type="text" class="" id="to_when" name="to_when" size="" ng-model="time.to_when" />
+        <button class="" ng-click="onClick(time, x, $index)" ng-model="currentProduct" ng-model="visible[$index]">Search</button>
+      </div>
+      <div class="panel" ng-if="x == currentProduct || visible[$index]">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>
+                section a
+              </th>
+              <th>
+                section b
+              </th>
+            </tr>
+          </thead>
+          <tbody ng-repeat="y in r223.sections">
+            <tr>
+              <td>
+                {{y.fname}}
+              </td>
+              <td>
+                {{y.lname}}
+              </td>
+            </tr>
+          </tbody>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+
+  </div>
+</div> -->
+
+
+<div class="right_col" ng-controller="requirement223 as r223" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Requirement 2-2-3</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <div class="row" ng-repeat="x in r223.assets | orderBy:timestamp">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h3>{{x.name}}</h3>
+        </div>
+
+        <div class="x_content">
+          <div class="x_content">
+            <b>Asset ID: </b> {{x.assetId}}
+          </div>
+          <div class="x_content">
+            <b>Location: </b> {{x.location.streetAddress}} {{x.location.locality}} {{x.location.country}}
+          </div>
+          <br />
+          <div class="x_content">
+            <div class="row">
+              <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="title">
+                  <h3>Sensor example</h3>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="form-group">
+                  <label for="from_when">From (UTC) </label>
+                  <input type="text" class="" id="from_when" name="from_when" size="" ng-model="time.from_when" />
+                  <label for="to_when">To (UTC) </label>
+                  <input type="text" class="" id="to_when" name="to_when" size="" ng-model="time.to_when" />
+                  <button class="" ng-click="onClick(time, x.assetId, $index)" ng-model="currentAssetId">Search</button>
+                  <button class="" ng-click="onClose($index)">Close</button>
+                </div>
+              </div>
+            </div>
+
+            <table class="table" ng-show="visible[$index]">
+              <thead>
+                <tr>
+                  <th>
+                    Energy usage
+                  </th>
+                  <th>
+                    Running
+                  </th>
+                  <th>
+                    Idle
+                  </th>
+                  <th>
+                    Off
+                  </th>
+                  <th>
+                    Time
+                  </th>
+                </tr>
+              </thead>
+              <tbody ng-repeat="y in r223.timeseries | orderBy:timestamp" ng-show="x.assetId == y.assetId">
+                <tr ng-repeat="z in y.response | orderBy:timestamp">
+                  <td>
+                    {{z.Energy_usage}}
+                  </td>
+                  <td>
+                    {{z.Running}}
+                  </td>
+                  <td>
+                    {{z.Idle}}
+                  </td>
+                  <td>
+                    {{z.Off}}
+                  </td>
+                  <td>
+                    {{z._time}}
+                  </td>
+                </tr>
+          </div>
+          </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement223", ['$rootScope', '$scope', '$http', function($rootScope, $scope, $http) {
+    var self = this;
+    self.assets = [];
+    self.timeseries = [];
+
+    $scope.visible = [];
+
+    self.fetchChildrenAssets = function(filter) {
+      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%2212cece3df9964e0e828262ff1773be51%22%7D';
+      var assetsReq = {
+        method: 'GET',
+        url: assetsUrl
+      }
+
+      $http(assetsReq).then(function(response) {
+        if (response.data.hasOwnProperty('_embedded')) {
+          self.assets = response.data['_embedded'].assets;
+        }
+
+      }).catch(function(e) {
+        console.log("Error: " + e, e.statusText);
+      })
+    }
+
+
+    $scope.onClick = function(time, assetId, index) {
+      $scope.visible[index] = true;
+      var filter = {};
+      if (time.from_when && time.to_when) {
+        filter = {
+          from: time.from_when,
+          to: time.to_when
+        }
+      }
+
+      var assetUrl = '/api/iottimeseries/v3/timeseries/' + assetId + '/OEA_sensor_example_dmc?from=' + filter.from + '&to=' + filter.to;
+
+      var assetReq = {
+        method: 'GET',
+        url: assetUrl
+      }
+
+      console.log(assetUrl);
+
+      $http(assetReq).then(function(response) {
+        self.timeseries[index] = {
+          assetId: assetId,
+          response: response.data
+        };
+        console.log(self.timeseries)
+      }).catch(function(e) {
+        console.log("Error: " + e, e.statusText);
+      })
+    }
+
+    $scope.onClose = function(index) {
+      $scope.visible[index] = false;
+    }
+
+
+    self.fetchChildrenAssets();
+
+  }]);
+</script>

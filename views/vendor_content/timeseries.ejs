@@ -1,0 +1,167 @@
+<div class="" ng-controller="TimeSeries as ctrl" ng-app="myApp">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Timeseries Charts</h3>
+        </div>
+
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div ng-hide="hasRouteParams">
+                    <div class="jumbotron">
+                        <p>Variable is not selected.</p>
+                        <p>Please go to 'Assets' page to select valid asset, aspect and variable values.</p>
+                    </div>
+                </div>
+                <div class="ng-hide" ng-show="hasRouteParams">
+                    <div class="x_title">
+                        <h2>{{title}}</h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <button type="button" ng-click="ctrl.startMonitor()">Monitor</button><button type="button" ng-click="ctrl.stopMonitor()">Stop Monitoring</button>
+                        <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-series="chartseries" chart-options="options">
+                        </canvas>
+                        <datetime-range start="start" end="end" presets="presets" on-change="dateChangedByUser()"></datetime-range>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+  var app = angular.module("myApp", ['ngRoute']);
+
+  app.controller("TimeSeries", ['$filter', '$routeParams', '$scope', '$http', '$interval', '$rootScope', function($filter, $routeParams, $scope, $http, $interval, $rootScope) {
+    var self = this;
+
+    $scope.hasRouteParams = false;
+    $scope.title = "";
+
+    $scope.start = moment().utc().subtract(1, 'hours');
+    $scope.end = moment().utc();
+
+    $scope.presets = [{
+        'name': 'Last Hour',
+        'start': moment().utc().subtract(1, 'hour'),
+        'end': moment().utc()
+      },
+      {
+        'name': 'Last 24 Hours',
+        'start': moment().utc().subtract(24, 'hour'),
+        'end': moment().utc()
+      },
+      {
+        'name': 'This Week',
+        'start': moment().utc().startOf('week').startOf('day'),
+        'end': moment().utc()
+      },
+      {
+        'name': 'This Month',
+        'start': moment().utc().startOf('month').startOf('day'),
+        'end': moment().utc()
+      },
+      {
+        'name': 'This Year',
+        'start': moment().utc().startOf('year').startOf('day'),
+        'end': moment().utc()
+      }
+    ];
+
+    $scope.data = [];
+    $scope.labels = [];
+    $scope.chartseries = [];
+
+    var filter = [];
+
+    try {
+      var filter = JSON.parse($routeParams.filter); //or just fileter?
+      $scope.hasRouteParams = true;
+      $scope.title = "Variable: " + filter.variableName + " | Aspect: " + filter.aspectName + " | AssetId: " + filter.assetId;
+      $scope.chartseries = [filter.variableName];
+    } catch (e) {
+      console.log("Error: " + e);
+      console.log({
+        "could not parse JSON:": $filter
+      });
+    }
+
+    console.log('JSON.stringify(filter): ' + JSON.stringify(filter));
+    console.log('filter.assetId: ' + filter.assetId);
+    console.log('filter.aspectName: ' + filter.aspectName);
+    console.log('filter.variableName: ' + filter.variableName);
+
+    $scope.option = {
+      legend: {
+        display: true
+      }
+    };
+
+    self.updateChart = function() {
+      var fromDateTime = '?from=' + self.dateTimeString($scope.start);
+      var toDateTime = '&to=' + self.dateTimeString($scope.end);
+      var intervalValue = '&intervalValue=1';
+      var intervalUnit = '&intervalUnit=minute';
+      var selectVariable = '&select=' + filter.variableName;
+      var aggrParams = fromDateTime + toDateTime + intervalValue + intervalUnit + selectVariable;
+      var timeUrl = '/api/iottimeseries/v3/timeseries/' + filter.assetId + '/' + filter.aspectName + aggrParams;
+
+      var timeReq = {
+        method: 'GET',
+        url: timeUrl
+      }
+
+      $http(timeReq).then(function(response) {
+        console.log("timeseries response: " + response);
+        response.data.forEach(function(aggrData) {
+          $scope.data.push(aggrData[filter.variableName].firstvalue);
+          $scope.labels.push(aggrData[filter.variableName].firsttime);
+        });
+      }).catch(function(err) {
+        console.log('Augh, there was an error of timeseries!', err.statusText);
+      });
+    };
+
+
+    self.monitorChart = function() {
+      $scope.start = moment().utc().subtract(20, 'minutes');
+      $scope.end = moment().utc();
+      self.updateChart();
+    }
+
+    self.startMonitor = function() {
+      $interval.cancel(scheduleId);
+      console.log("Start monitoring");
+      scheduleId = $interval(self.monitorChart, 3000);
+      console.log("Monitor " + JSON.stringify(scheduleId));
+    }
+
+    self.stopMonitor = function() {
+      console.log("Stop monitoring " + JSON.stringify(scheduleId));
+      $interval.cancel(scheduleId);
+    }
+
+    self.dateTimeString = function(obj) {
+      try {
+        var displayString = obj.format('YYYY-MM-DDThh:mm') + ':00Z';
+      } catch (e) {
+        console.log("Display String Err: " + e);
+        console.log("Given parameter is not a moment obj: " + obj);
+      }
+
+      return displayString;
+    }
+
+  }]);
+</script>

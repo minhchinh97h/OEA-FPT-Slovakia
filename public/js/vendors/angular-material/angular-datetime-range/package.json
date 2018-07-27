@@ -1,0 +1,74 @@
+{
+  "_from": "angular-datetime-range@^0.2.14",
+  "_id": "angular-datetime-range@0.2.15",
+  "_inBundle": false,
+  "_integrity": "sha512-4co4Wl4s+V+Vfbf8fqib7cMpqVUQpsUchyAYnsUj0/6ahUCNXdN9tG4WJXBapb0sp5rsCT9zSoePYX1lcIuEDA==",
+  "_location": "/angular-datetime-range",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "angular-datetime-range@^0.2.14",
+    "name": "angular-datetime-range",
+    "escapedName": "angular-datetime-range",
+    "rawSpec": "^0.2.14",
+    "saveSpec": null,
+    "fetchSpec": "^0.2.14"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/angular-datetime-range/-/angular-datetime-range-0.2.15.tgz",
+  "_shasum": "c37e215025b65dfddb3b6397fb4f094b510e241e",
+  "_spec": "angular-datetime-range@^0.2.14",
+  "_where": "E:\\MACINTOSH_OEA\\MACINTOSH\\oea",
+  "author": {
+    "name": "g1eb",
+    "email": "mail@g1eb.com",
+    "url": "https://g1eb.com"
+  },
+  "bugs": {
+    "url": "https://github.com/g1eb/angular-datetime-range/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "angular": "^1.5.6",
+    "moment": "^2.13.0"
+  },
+  "deprecated": false,
+  "description": "UI widget for datetime range input, converted to an angular directive for your convenience.",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-angular-embed-templates": "^2.2.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-uglify": "^1.5.3"
+  },
+  "homepage": "https://github.com/g1eb/angular-datetime-range#readme",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "directive",
+    "date",
+    "time",
+    "datetime",
+    "range",
+    "daterange",
+    "datepair",
+    "input",
+    "picker",
+    "dateinput",
+    "timeinput"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "angular-datetime-range",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/g1eb/angular-datetime-range.git"
+  },
+  "scripts": {
+    "build": "gulp build"
+  },
+  "version": "0.2.15"
+}
