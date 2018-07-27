@@ -1,0 +1,187 @@
+<div class="right_col" ng-controller="AssetList as list" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>List of Assets</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <form ng-submit="filterAssetList()">
+    <label>Search for a asset name</label>
+    <input type="text" ng-model="searchBoxText" />
+    <button type="submit" value="Search">Search</button>
+  </form>
+
+  <div ng-controller="BusyIndicator as bi" layout="column" ng-cloak>
+    <md-content layout-padding>
+      <div layout="row" layout-sm="column" layout-align="space-around">
+        <md-progress-circular md-mode="intermediate" ng-disabled="!busy"></md-progress-circular>
+      </div>
+    </md-content>
+  </div>
+
+  <div class="row" ng-repeat="x in list.assets | orderBy:timestamp | limitTo:pageSize">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <label class="checkbox">
+            <input type="checkbox" id="{{x.name}}" style="display:none" ng-model="show" ng-class='{open:show}'/>
+            <h2>{{x.name}}</h2>
+          </label>
+          <ul class="nav navbar-right panel_toolbox"></ul>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content" ng-show="show">
+          <div class="x_content">
+            <b>Asset-ID:</b> {{x.assetId}}
+          </div>
+          <div class="x_content">
+            <b>Location:</b> {{x.location.streetAddress}} {{x.location.postalCode}} {{x.location.locality}} {{x.location.country}}
+          </div>
+
+
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Aspects for Asset: {{x.assetId}}</h2>
+                  <div class="clearfix">
+                  </div>
+                </div>
+                <div class="x_content">
+                  <div class="row" ng-repeat="y in x.aspects | orderBy:timestamp | limitTo:pageSize">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                      <div class="y_panel">
+                        <div class="y_title">
+                          <label class="checkbox">
+                            <input type="checkbox" id="{{y.name}}" style="display:none" ng-model="show" ng-class="{open:show}" />
+                            <h2>{{y.name}}</h2>
+                          </label>
+
+                          <ul class="nav navbar-right panel_toolbox"></ul>
+                          <div class="clearfix"></div>
+
+                        </div>
+                        <div class="y_content" ng-show="show">
+                          <div class="y_content">
+                            <b>Aspect type ID:</b> {{y.aspectTypeId}}
+                          </div>
+                          <div class="y_content">
+                            <b>Variables:</b>
+                          </div>
+                          <div class="row" ng-repeat="z in y.variables">
+                            <a ng-href="{{varLinkToTimeseries(x.assetId, y.name, z.name)}}">
+                              <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="z_panel">
+                                  <div class="z_content">
+                                    <b>Variable Name:</b> {{z.name}}
+                                  </div>
+                                  <div class="z_content">
+                                    <b>Unit:</b> {{z.unit}}
+                                  </div>
+                                </div>
+                              </div>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- This below script will be organized in a .js file later -->
+<script>
+  var app = angular.module("myApp", []);
+  app.controller('BusyIndicator', ['$scope', '$interval', function($scope, $interval) {
+    var self = this;
+  }]);
+
+  app.controller('AssetList', ['$scope', '$http', function($scope, $http) {
+    var self = this;
+    self.assets = [];
+
+    self.fetchDataFromAssetManagement = function(filterParams) {
+      var assetsURL = '/api/assetmangement/v3/assets';
+
+      if (filterParams) {
+        assetsURL += '?filter=' + encodeURIComponent(filterParams);
+      }
+
+      var assetRequest = {
+        method: 'GET',
+        url: assetsURL
+      };
+
+      $http(assetRequest).then(function(response) {
+        console.log("asset response: " + response);
+        if (response.data.hasOwnProperty("__embedded")) {
+          self.assets = response.data['__embedded'].assets;
+        }
+
+        self.assets.forEach(function(asset) {
+          if (!asset.assetId) {
+            console.log('asset has no id, skip this asset and proceed with next asset' + ': ' + response);
+            return;
+          }
+
+          var aspectsReq = {
+            method: 'GET',
+            url: '/api/assetmangement/v3/assets/' + asset.assetId + '/aspects'
+          }
+
+          $http(aspectsReq).then(function(response) {
+            console.log('aspects retrieved from API for asset ' + asset.assetId + ': ' + response);
+            if (response.data.hasOwnProperty('__embedded')) {
+              asset.aspects = response.data['__embedded']['aspects'];
+
+            }
+          }).catch(function(err) {
+            console.log('Augh, there was an error about aspects!', err.statusText);
+          });
+
+        });
+
+      }).catch(function(err) {
+        console.log('Augh, there was an error about assets!', err.statusText);
+      });
+    }
+
+    $scope.varLinkToTimeseries = function(assetId, aspectName, variableName) {
+      var linkParams = {
+        assetId: assetId,
+        aspectName: aspectName,
+        variableName: variableName
+      }
+
+      return '/form/timeseries/' + encodeURIComponent(angular.toJson(linkParams));
+    }
+
+    $scope.filterAssetList = function() {
+      if ($scope.searchBoxText) {
+        var filterAssetName = '{"name":{"contains":{"value":"' + $scope.searchBoxText + '"}}}';
+        self.fetchDataFromAssetManagement(filterAssetName);
+      } else {
+        self.fetchDataFromAssetManagement();
+      }
+    }
+  }]);
+</script>

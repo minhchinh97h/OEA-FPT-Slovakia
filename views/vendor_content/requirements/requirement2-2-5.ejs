@@ -1,0 +1,135 @@
+<div class="right_col" ng-controller="requirement225 as r225" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Requirement 2-2-5</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <div class="row" ng-repeat="x in r225.assets | orderBy:timestamp | limitTo:pageSize">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h3>{{x.name}}</h3>
+        </div>
+
+        <div class="x_content">
+          <div class="x_content">
+            <b>Asset ID: </b> {{x.assetId}}
+          </div>
+          <div class="x_content">
+            <b>Location: </b> {{x.location.streetAddress}}  {{x.location.locality}}  {{x.location.country}}
+          </div>
+          <br />
+          <div class="x_content">
+            <div class="title">
+              <h3>Sensor example</h3>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>
+                    Energy usage
+                  </th>
+                  <th>
+                    Running
+                  </th>
+                  <th>
+                    Idle
+                  </th>
+                  <th>
+                    Off
+                  </th>
+                  <th>
+                    Time
+                  </th>
+                </tr>
+              </thead>
+              <tbody ng-repeat="y in x.timeseries | orderBy:timestamp">
+                <tr>
+                  <td>
+                    {{y.Energy_usage}}
+                  </td>
+                  <td>
+                    {{y.Running}}
+                  </td>
+                  <td>
+                    {{y.Idle}}
+                  </td>
+                  <td>
+                    {{y.Off}}
+                  </td>
+                  <td>
+                    {{y._time}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement225", ['$scope', '$http', function($scope, $http) {
+    var self = this;
+    self.assets = [];
+    var token;
+
+    self.getHeader = function(){
+      var url = {
+        method: 'GET',
+        url: '/'
+      }
+
+      $http(url).then(function(req, res){
+        console.log(req.headers.authorization);
+      }).catch(function(e){
+        console.log("Err: " + e, e.statusText);
+      })
+    }
+
+    self.getHeader();
+
+    self.fetchChildrenAssets = function() {
+      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%2212cece3df9964e0e828262ff1773be51%22%7D';
+      var assetsReq = {
+        method: 'GET',
+        url: assetsUrl
+      }
+
+      $http(assetsReq).then(function(response) {
+        if (response.data.hasOwnProperty('_embedded')) {
+          self.assets = response.data['_embedded'].assets;
+        }
+
+        self.assets.forEach(function(asset) {
+          var assetUrl = '/api/iottimeseries/v3/timeseries/' + asset.assetId + '/OEA_sensor_example_dmc?from=2018-07-25T00:00:00Z&to=2018-07-25T23:50:00Z';
+
+          var assetReq = {
+            method: 'GET',
+            url: assetUrl
+          }
+
+          $http(assetReq).then(function(response) {
+            asset.timeseries = response.data;
+
+          }).catch(function(e) {
+            console.log("Error: " + e, e.statusText);
+          })
+        })
+      }).catch(function(e) {
+        console.log("Error: " + e, e.statusText);
+      })
+    }
+
+    self.fetchChildrenAssets();
+
+  }]);
+</script>

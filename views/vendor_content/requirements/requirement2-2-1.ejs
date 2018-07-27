@@ -1,0 +1,122 @@
+<div class="right_col" ng-controller="requirement221 as r221" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Getting asset info</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="panel">
+        <div class="title">
+          <h2>{{r221.info.name}}</h2>
+        </div>
+        <div class="content">
+          <div class="content">
+            <b>AssetId:</b> {{r221.info.assetId}}
+          </div>
+          <div class="content">
+            <b>Location:</b> {{r221.info.location.streetAddress}} {{r221.info.location.locality}} {{r221.info.location.country}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div clsas="row">
+    <div class="panel">
+      <div class="title">
+        <h2>This is extracted info from IoT timeseires api</h2>
+      </div>
+      <div class="content">
+        <div ng-repeat="x in r221.timeseriesInfo | orderBy:timestamp | limitTo:pageSize">
+          <table class="table">
+            <thead>
+              <tr>
+                <td>
+                  Energy usage
+                </td>
+                <td>
+                  Running
+                </td>
+                <td>
+                  Idle
+                </td>
+                <td>
+                  Off
+                </td>
+                <td>
+                  Time
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  {{x.Energy_usage}}
+                </td>
+                <td>
+                  {{x.Running}}
+                </td>
+                <td>
+                  {{x.Idle}}
+                </td>
+                <td>
+                  {{x.Off}}
+                </td>
+                <td>
+                  {{x._time}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement221", ['$scope', '$http', function($scope, $http) {
+    var self = this;
+    self.info = {};
+    self.timeseriesInfo = [];
+    self.fetchAsset = function() {
+      var assetUrl = '/api/assetmanagement/v3/assets/89e3077d696f4156b937164b5d09ec75';
+
+      var assetReq = {
+        method: 'GET',
+        url: assetUrl
+      }
+
+      $http(assetReq).then(function(response) {
+        self.info = response.data;
+      }).catch(function(e) {
+        console.log("There was an err: " + e, e.statusText);
+      });
+    }
+
+    self.fetchTimeseries = function() {
+      var timeseriesUrl = '/api/iottimeseries/v3/timeseries/89e3077d696f4156b937164b5d09ec75/OEA_sensor_example_dmc?from=2018-07-25T00:00:00Z&to=2018-07-25T23:50:00Z';
+
+      var timeseriesReq = {
+        method: 'GET',
+        url: timeseriesUrl
+      }
+
+      $http(timeseriesReq).then(function(response) {
+        self.timeseriesInfo = response.data;
+      }).catch(function(e) {
+        console.log("There was an err: " + e, e.statusText);
+      })
+    }
+
+    self.fetchTimeseries();
+    self.fetchAsset();
+
+  }]);
+</script>

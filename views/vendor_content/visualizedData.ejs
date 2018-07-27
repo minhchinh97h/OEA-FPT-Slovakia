@@ -1,0 +1,195 @@
+ <div class="right_col" ng-controller="VisualizedData as vd" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Example of requirement 2.2.1</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <form ng-submit="vd.filterAssetList()">
+    <label>Search for a asset name</label>
+    <input type="text" ng-model="searchBoxText" />
+    <button type="submit" value="Search">Search</button>
+  </form>
+
+  <!-- <div class="row" ng-repeat="x in vd.assets | orderBy:timestamp | limitTo:pageSize"> -->
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="x_panel">
+        <div class="x_title">
+          <h2>{{x.name}}</h2>
+          <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+          <div class="row">
+
+
+
+            <!-- <div class="navbar navbar-default"> -->
+            <!-- <ul class="nav navbar-nav">
+                  <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="">This place is for naming purpose</i> <span class="fa fa-chevron-down"></span></a>
+                    <ul class="dropdown-menu">
+                      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="">This is 1 </i> <span class="fa fa-chevron-down"></span></a>
+
+                      </li>
+                      <li>
+                        <a href="#">Test 2</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul> -->
+            <div class="dropdown">
+              <div class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                  <h2 >This place for asset's name</h2>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                  <span class="fa fa-chevron-down"></span>
+                </div>
+
+              </div>
+                <div class="dropdown-menu">
+                  <h2>Test1</h2>
+                </div>
+              <!-- </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="">
+    <table class="table ">
+      <thead>
+        <tr>
+          <th>
+
+          </th>
+          <th>
+            Power Percentage
+          </th>
+          <th>
+            Display Time
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Running
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Idle
+          </td>
+          <td>
+            30%
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Off
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div> -->
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+  var app = angular.module("myApp", []);
+
+
+
+
+
+  app.controller("VisualizedData", ['$scope', '$http', function($scope, $http) {
+    var self = this;
+
+    self.assets = [];
+    self.fetchAssetSuccess = false;
+
+    self.fetchAsset = function(filter) {
+      var assetUrl = '/api/assetmangement/v3/assets';
+
+      if (filter) {
+        assetUrl = assetUrl + "?filter=" + encodeURIComponent(filter);
+      }
+
+
+      var assetReq = {
+        method: 'GET',
+        url: assetUrl
+      };
+
+      $http(assetReq).then(function(response) {
+        if (response.data.hasOwnProperty("__embedded")) {
+          self.assets = response.data["__embedded"].assets;
+        }
+
+        self.assets.forEach(function(asset) {
+          if (!asset.assetId) {
+            console.log("Asset has no id, skip");
+            return;
+          } else {
+            var aspectsReq = {
+              method: 'GET',
+              url: '/api/assetmangement/v3/assets' + asset.assetId + '/aspects'
+            };
+
+            $http(aspectsReq).then(function(response) {
+              asset.aspects = [];
+              if (response.data.hasOwnProperty('__embedded')) {
+                asset.aspects = response.data['__embedded']['aspects'];
+              }
+
+              asset.aspects.forEach(function() {
+
+              });
+
+
+            }).catch(function(e) {
+              console.log("There was an err: " + e, e.statusText);
+            });
+          }
+
+        });
+
+      }).catch(function(e) {
+        console.log("There was an err: " + e, e.statusText);
+      });
+    }
+
+    self.varLinkToTimeseries = function(assetId, aspectName, variableName) {
+      var linkParams = {
+        assetId: assetId,
+        aspectName: aspectName,
+        variableName: variableName
+      }
+
+      return linkParams;
+    }
+
+
+
+    self.filterAssetList = function() {
+      if (!$scope.searchBoxText) {
+        console.log("Please enter an asset");
+      } else {
+        var filterAssetName = '{"name":{"contains":{"value":"' + $scope.searchBoxText + '"}}}';
+        self.fetchAsset(filterAssetName);
+      }
+    }
+
+  }]);
+</script>

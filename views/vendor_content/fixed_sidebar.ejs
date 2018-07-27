@@ -1,0 +1,75 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+    <!-- head base -->
+    <div lang="en" th:replace="components/common/head_base :: head_base(title='FixedSidebar')"> </div>
+    <!-- /head base -->
+
+    <!-- jQuery custom content scroller -->
+    <link href="/css/vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet" type="text/css" />
+  </head>
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col menu_fixed">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="dashboard.html" class=
+              "site_title"><span>Gentelella Alela!</span></a>
+            </div>
+            <div class="clearfix"></div>
+            <!-- menu profile quick info -->
+            <div lang="en" th:replace=
+            "components/common/profile_quick_info"></div>
+            <!-- /menu profile quick info -->
+            <br />
+            <!-- sidebar menu -->
+            <div th:replace="components/common/sidemenu"></div>
+            <!-- /sidebar menu -->
+            <!-- menu footer buttons -->
+            <div th:replace=
+            "components/common/menu_footer_buttons"></div>
+            <!-- /menu footer buttons -->
+          </div>
+        </div><!-- top navigation -->
+        <div th:replace="components/common/top_navigation"></div>
+        <!-- /top navigation -->
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3>
+                  Fixed Sidebar <small>Just add class
+                  <strong>menu_fixed</strong></small>
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div><!-- /page content -->
+        <!-- footer content -->
+        <div th:replace="components/common/footer"></div>
+        <!-- /footer content -->
+      </div>
+    </div><!-- jQuery -->
+    <script src="/js/vendors/jquery/jquery.min.js" type=
+    "text/javascript">
+</script><!-- Bootstrap -->
+    <script src="/js/vendors/bootstrap/bootstrap.min.js" type=
+    "text/javascript">
+</script><!-- FastClick -->
+    <script src="/js/vendors/fastclick/fastclick.js" type=
+    "text/javascript">
+</script><!-- NProgress -->
+    <script src="/js/vendors/nprogress/nprogress.js" type=
+    "text/javascript">
+</script><!-- jQuery custom content scroller -->
+    <script src=
+    "/js/vendors/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"
+    type="text/javascript">
+</script><!-- Custom Theme Scripts -->
+    <script src="/js/custom.min.js" type="text/javascript">
+</script>
+  </body>
+</html>
