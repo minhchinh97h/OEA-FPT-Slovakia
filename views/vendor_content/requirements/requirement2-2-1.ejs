@@ -85,8 +85,10 @@
     var self = this;
     self.info = {};
     self.timeseriesInfo = [];
+
+    //Get asset infor of asset ID 80c2b3c221ae426b9787fe41e3a81a8b (asset ID maybe changed)
     self.fetchAsset = function() {
-      var assetUrl = '/api/assetmanagement/v3/assets/89e3077d696f4156b937164b5d09ec75';
+      var assetUrl = '/api/assetmanagement/v3/assets/80c2b3c221ae426b9787fe41e3a81a8b';
 
       var assetReq = {
         method: 'GET',
@@ -100,8 +102,9 @@
       });
     }
 
+    //Get time series data of asset ID 80c2b3c221ae426b9787fe41e3a81a8b from 2018-07-30T00:00:00Z to 2018-07-30T23:50:00Z (timeline maybe changed)
     self.fetchTimeseries = function() {
-      var timeseriesUrl = '/api/iottimeseries/v3/timeseries/89e3077d696f4156b937164b5d09ec75/OEA_sensor_example_dmc?from=2018-07-25T00:00:00Z&to=2018-07-25T23:50:00Z';
+      var timeseriesUrl = '/api/iottimeseries/v3/timeseries/80c2b3c221ae426b9787fe41e3a81a8b/oea_aspect_dmc?from=2018-07-30T00:00:00Z&to=2018-07-30T23:50:00Z';
 
       var timeseriesReq = {
         method: 'GET',

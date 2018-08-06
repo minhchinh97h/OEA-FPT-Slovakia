@@ -1,0 +1,134 @@
+<div class="right_col" ng-controller="requirement222 as r222" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Requirement 222</h3>
+    </div>
+  </div>
+
+  <div class="clearfix">
+  </div>
+
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <form ng-submit="fetchAssets()">
+        <label>Search for asset(s):</label>
+        <input type="text" ng-model="searchBoxText" />
+        <button type="submit" value="Search">Search</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="clearfix">
+  </div>
+
+  <div class="row" ng-repeat="asset in r222.assets | orderBy:timestamp">
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="panel">
+        <div class="title">
+          <h4>{{asset.name}}</h4>
+        </div>
+        <div class="content">
+          <div class="content">
+            <b>Asset ID: </b> {{asset.assetId}}
+          </div>
+          <div class="content">
+            <b>Parent ID: </b> {{asset.parentId}}
+          </div>
+          <div class="content">
+            <b>Location: </b> {{asset.location.streetAddress}} {{asset.location.locality}} {{asset.location.country}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="panel">
+        <div class="title">
+          <h4>Define Energy Usage</h4>
+        </div>
+        <div class="content">
+          <table class="table">
+            <thead>
+              <tr>
+                <td>
+                  Running
+                </td>
+                <td>
+                  Idle
+                </td>
+                <td>
+                  Off
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input type="text" ng-model="running" />
+                </td>
+                <td>
+                  <input type="text" ng-model="idle" />
+                </td>
+                <td>
+                  <input type="text" ng-model="off" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button ng-click="changeEnergyUsage(running, idle, off, asset.assetId)">Set</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement222", ['$http', '$scope', function($http, $scope) {
+    $scope.searchBoxText = "";
+    $scope.running = "";
+    $scope.idle = "";
+    $scope.off = "";
+
+    var self = this;
+    self.assets = [];
+
+    //get all the assets with filter params
+    function getAssets(filter) {
+      var assetsUrl = '/api/assetmanagement/v3/assets' + '?filter=' + encodeURIComponent(filter);
+
+      var assetsReq = {
+        method: 'GET',
+        url: assetsUrl
+      }
+
+      $http(assetsReq).then(function(response) {
+        if (response.data.hasOwnProperty('_embedded')) {
+          self.assets = response.data._embedded.assets;
+        }
+      }).catch(function(err) {
+        console.log("There was an err" + err, err.statusText);
+      })
+
+    }
+
+    //scope function that will be called in html form for customers to search which assets they want
+    $scope.fetchAssets = function() {
+      if ($scope.searchBoxText) {
+        var filterParams = '{"name":{"contains":{"value":"' + $scope.searchBoxText + '"}}}';
+
+        getAssets(filterParams);
+      }
+    }
+
+    //scope function used for later defining energy usage operation
+    $scope.changeEnergyUsage = function(running, idle, off, assetId) {
+      //DO SOMETHING
+    }
+
+  }])
+</script>

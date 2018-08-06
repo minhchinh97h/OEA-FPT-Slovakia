@@ -7,9 +7,12 @@ applications:
     host: oea-dmc-academy2
     domain: apps.eu1.mindsphere.io
     command: node app.js
-env:
-  CONFIG: '{
-    "clientId": "",
-    "clientSecret": "",
-    "securityServiceUrl": ""
-}'
+    services:
+      - oea-db-dmc
+    env:
+      CONFIG: '{
+      "clientId": "",
+      "clientSecret": "",
+      "securityServiceUrl": "",
+      "mongoservice": "oea-db-dmc"
+      }'

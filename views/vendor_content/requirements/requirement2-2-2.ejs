@@ -1,0 +1,163 @@
+<div class="right_col" ng-controller="requirement222 as r222" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Requirement 2-2-4</h3>
+    </div>
+  </div>
+
+  <div class="clearfix"></div>
+
+  <div class="row" ng-repeat="asset in r222.oea_asset_libs" ng-include="'assetTree'">
+  </div>
+</div>
+
+<script type="text/ng-template" id="assetTree">
+  <div class="row">
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="panel">
+        <div class="title">
+          {{asset.name}}
+        </div>
+        <div class="content">
+          <div class="content">
+            <b>Asset ID: </b> {{asset.assetId}}
+          </div>
+          <div class="content">
+            <b>Parent ID: </b> {{asset.parentId}}
+          </div>
+          <div class="content">
+            <b>Location: </b> {{asset.location.streetAddress}} {{asset.location.locality}} {{asset.location.country}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <label for="parent">Insert parent id</label>
+      <input type="text" ng-model="parent" id="parent" />
+      <button ng-click="moveToParent(asset.assetId, parent, asset.etag)">Move</button>
+      <label for="running">Running</label>
+      <input type="text" ng-model="running" id="running"/>
+      <button ng-click="setPercentage(running, $index, asset.assetId)">Set</button>
+      <label for="idle">Idle</label>
+      <input type="text" ng-model="idle" id="idle"/>
+      <button ng-click="setPercentage(idle, $index, asset.assetId)">Set</button>
+      <label for="off">Off</label>
+      <input type="text" ng-model="off" id="off"/>
+      <button ng-click="setPercentage(off, $index, asset.assetId)">Set</button>
+    </div>
+  </div>
+  <div ng-if="asset.children">
+    <div class="right_col">
+
+      <div class="row" ng-repeat="asset in asset.children | orderBy:timestamp" ng-include="'assetTree'">
+      </div>
+
+    </div>
+  </div>
+</script>
+
+
+
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement222", ['$http', '$scope', function($http, $scope) {
+    var self = this;
+
+    self.oea_asset_libs = [];
+    self.child_assets = {};
+    self.rootAsset = {};
+
+    $scope.parent = "";
+
+    // var rootAssetUrl = '/api/assetmanagement/v3/assets?filter={"name":{"contains":{"value":"oea_asset_lib"}}}';
+    var rootAssetUrl = '/api/assetmanagement/v3/assets/700a835ec4c247baa8acca1cb0cd0f02';
+
+    var rootAssetReq = {
+      method: 'GET',
+      url: rootAssetUrl
+    }
+
+    $http(rootAssetReq).then(function(response) {
+      self.oea_asset_libs.push(response.data);
+
+      rootAssetUrl = '/api/assetmanagement/v3/assets/40aac82fdf6c4786aa6094a0af1e4336';
+
+      rootAssetReq = {
+        method: 'GET',
+        url: rootAssetUrl
+      }
+
+      $http(rootAssetReq).then(function(response) {
+        self.oea_asset_libs.push(response.data);
+
+        self.oea_asset_libs.forEach(function(lib) {
+          console.log(lib);
+          assetRecursion(lib);
+        })
+      }).catch(function(error) {
+        console.log("There was an error:" + error, error.statusText);
+      })
+
+    }).catch(function(error) {
+      console.log("There was an error:" + error, error.statusText);
+    })
+
+
+
+    function assetRecursion(asset) {
+      if (!asset._links.hasOwnProperty('children'))
+        return;
+      else {
+        var assetUrl = asset._links.children.href;
+        asset.children = [];
+
+        var assetReq = {
+          method: 'GET',
+          url: assetUrl
+        }
+
+        $http(assetReq).then(function(response) {
+          if (response.data.hasOwnProperty('_embedded')) {
+            asset.children = response.data._embedded.assets;
+          }
+
+          asset.children.forEach(function(child) {
+            assetRecursion(child);
+          })
+        }).catch(function(err) {
+          console.log("There was an error: " + err, err.statusText);
+        })
+      }
+    }
+
+    $scope.moveToParent = function(assetId, parentId, etag) {
+      var moveUrl = '/api/assetmanagement/v3/assets/' + assetId + '/move';
+
+      var moveReq = {
+        method: 'POST',
+        url: moveUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'If-Match': etag
+        },
+        data: {
+          'newParentId': parentId
+        }
+      }
+
+      console.log(moveReq);
+
+      $http(moveReq).then(function(){
+      }).catch(function(err){
+        console.log("There was an err: " + err, err.statusText);
+      })
+    }
+
+    $scope.setPercentage = function(param, index, assetId){
+      //DO SOMETHING
+    }
+
+  }])
+</script>

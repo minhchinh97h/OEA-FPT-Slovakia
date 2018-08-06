@@ -1,55 +1,3 @@
-<!-- <div class="right_col" ng-controller="requirement223 as r223" ng-app="myApp">
-  <div class="row">
-    <div class="col-md-6 col-sm-6 col-xs-6">
-
-    </div>
-    <div class="col-md-6 col-sm-6 col-xs-6" ng-repeat="x in r223.products">
-      <div class="title">
-        <h3>{{x}}</h3>
-      </div>
-      <div class="form-group">
-        <label for="from_when">From (UTC) </label>
-        <input type="text" class="" id="from_when" name="from_when" size="" ng-model="time.from_when" />
-
-        <label for="to_when">To (UTC) </label>
-        <input type="text" class="" id="to_when" name="to_when" size="" ng-model="time.to_when" />
-        <button class="" ng-click="onClick(time, x, $index)" ng-model="currentProduct" ng-model="visible[$index]">Search</button>
-      </div>
-      <div class="panel" ng-if="x == currentProduct || visible[$index]">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>
-                section a
-              </th>
-              <th>
-                section b
-              </th>
-            </tr>
-          </thead>
-          <tbody ng-repeat="y in r223.sections">
-            <tr>
-              <td>
-                {{y.fname}}
-              </td>
-              <td>
-                {{y.lname}}
-              </td>
-            </tr>
-          </tbody>
-          <tbody>
-
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-
-
-  </div>
-</div> -->
-
-
 <div class="right_col" ng-controller="requirement223 as r223" ng-app="myApp">
   <div class="page-title">
     <div class="title_left">
@@ -84,9 +32,9 @@
               <div class="col-md-6 col-sm-6 col-xs-6">
                 <div class="form-group">
                   <label for="from_when">From (UTC) </label>
-                  <input type="text" class="" id="from_when" name="from_when" size="" ng-model="time.from_when" />
+                  <input type="text" class="" id="from_when" name="from_when" size="" ng-model="time.from_when" placeholder="2018-07-25T00:00:00Z"/>
                   <label for="to_when">To (UTC) </label>
-                  <input type="text" class="" id="to_when" name="to_when" size="" ng-model="time.to_when" />
+                  <input type="text" class="" id="to_when" name="to_when" size="" ng-model="time.to_when" placeholder="2018-07-25T23:50:00Z"/>
                   <button class="" ng-click="onClick(time, x.assetId, $index)" ng-model="currentAssetId">Search</button>
                   <button class="" ng-click="onClose($index)">Close</button>
                 </div>
@@ -152,8 +100,9 @@
 
     $scope.visible = [];
 
+    //get children assets of assetID 700a835ec4c247baa8acca1cb0cd0f02 (can be changed to retrieve dynamic asset ID calls)
     self.fetchChildrenAssets = function(filter) {
-      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%2212cece3df9964e0e828262ff1773be51%22%7D';
+      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%22700a835ec4c247baa8acca1cb0cd0f02%22%7D';
       var assetsReq = {
         method: 'GET',
         url: assetsUrl
@@ -169,7 +118,7 @@
       })
     }
 
-
+    //This scope function is to get time series data on each different asset which is clicked (show and close toggles)
     $scope.onClick = function(time, assetId, index) {
       $scope.visible[index] = true;
       var filter = {};
@@ -180,7 +129,7 @@
         }
       }
 
-      var assetUrl = '/api/iottimeseries/v3/timeseries/' + assetId + '/OEA_sensor_example_dmc?from=' + filter.from + '&to=' + filter.to;
+      var assetUrl = '/api/iottimeseries/v3/timeseries/' + assetId + '/oea_aspect_dmc?from=' + filter.from + '&to=' + filter.to;
 
       var assetReq = {
         method: 'GET',

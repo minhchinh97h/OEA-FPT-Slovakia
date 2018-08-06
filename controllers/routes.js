@@ -1,7 +1,37 @@
 const express = require("express");
 const router = express.Router();
 
+var mongoUtils = require('../mongoUtilities');
+// var mongodbUtils = require('../mongodbUtilities')
+// var mongooseUtils = require('../mongooseUtilities');
+
+
 //INCLUDING DIRECT ROUTES
+
+// router.get("/mongoose", function(req, res) {
+//   mongooseUtils.getDatabaseHandle();
+//   res.send(mongooseUtils.connectStr);
+// })
+
+// router.get("/mongodb", function(req, res){
+//   mongodbUtils.getDatabaseHandle();
+//
+//   res.send(mongodbUtils.connectStr);
+// })
+
+//To verify the connection between mindsphere app and mongodb through mongojs. If connected,
+//the page will display the connected uri from mongodb32 service of Cloud Foundry.
+router.get("/mongojs", function(req, res){
+  var db = mongoUtils.getDatabaseHandle();
+
+  res.send(mongoUtils.connectStr);
+})
+
+
+
+
+
+
 router.get("/", function(req, res) {
   const content = {
     "head": "./components/dashboard1/head",
@@ -129,6 +159,18 @@ router.get("/form/requirement221", function(req, res){
   });
 })
 
+router.get("/form/requirement222", function(req, res){
+  const content = {
+    "head": "vendor_content/headers/form",
+    "content":"vendor_content/requirements/requirement2-2-2_01",
+    "scripts": "vendor_content/scripts/form"
+  }
+
+  res.render("main_dashboard", {
+    "content": content
+  });
+})
+
 router.get("/form/requirement223", function(req, res){
   const content = {
     "head": "vendor_content/headers/form",
@@ -140,6 +182,19 @@ router.get("/form/requirement223", function(req, res){
     "content": content
   });
 })
+
+router.get("/form/requirement224", function(req, res){
+  const content = {
+    "head": "vendor_content/headers/form",
+    "content":"vendor_content/requirements/requirement2-2-4_01",
+    "scripts": "vendor_content/scripts/form"
+  }
+
+  res.render("main_dashboard", {
+    "content": content
+  });
+})
+
 
 router.get("/form/requirement225", function(req, res){
   const content = {
@@ -153,5 +208,16 @@ router.get("/form/requirement225", function(req, res){
   });
 })
 
+router.get("/form/r224test", function(req, res){
+  const content = {
+    "head": "vendor_content/headers/form",
+    "content":"vendor_content/test/r224test",
+    "scripts": "vendor_content/scripts/form"
+  }
+
+  res.render("main_dashboard", {
+    "content": content
+  });
+})
 
 module.exports = router;

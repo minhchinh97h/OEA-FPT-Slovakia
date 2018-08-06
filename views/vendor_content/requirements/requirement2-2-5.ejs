@@ -80,25 +80,10 @@
   app.controller("requirement225", ['$scope', '$http', function($scope, $http) {
     var self = this;
     self.assets = [];
-    var token;
 
-    self.getHeader = function(){
-      var url = {
-        method: 'GET',
-        url: '/'
-      }
-
-      $http(url).then(function(req, res){
-        console.log(req.headers.authorization);
-      }).catch(function(e){
-        console.log("Err: " + e, e.statusText);
-      })
-    }
-
-    self.getHeader();
-
+    //this function is to get children assets and their timeseries data to display in html DOM object of asset ID 700a835ec4c247baa8acca1cb0cd0f02
     self.fetchChildrenAssets = function() {
-      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%2212cece3df9964e0e828262ff1773be51%22%7D';
+      var assetsUrl = '/api/assetmanagement/v3/assets?filter=%7B%22parentId%22:%22700a835ec4c247baa8acca1cb0cd0f02%22%7D';
       var assetsReq = {
         method: 'GET',
         url: assetsUrl
@@ -110,7 +95,7 @@
         }
 
         self.assets.forEach(function(asset) {
-          var assetUrl = '/api/iottimeseries/v3/timeseries/' + asset.assetId + '/OEA_sensor_example_dmc?from=2018-07-25T00:00:00Z&to=2018-07-25T23:50:00Z';
+          var assetUrl = '/api/iottimeseries/v3/timeseries/' + asset.assetId + '/oea_aspect_dmc?from=2018-07-30T00:00:00Z&to=2018-07-30T23:50:00Z';
 
           var assetReq = {
             method: 'GET',

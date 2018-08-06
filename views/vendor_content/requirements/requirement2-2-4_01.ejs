@@ -1,0 +1,110 @@
+<div class="right_col" ng-controller="requirement224 as r224" ng-app="myApp">
+  <div class="page-title">
+    <div class="title_left">
+      <h3>Requirement 224</h3>
+    </div>
+  </div>
+
+  <div class="clearfix">
+  </div>
+
+  <div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <form ng-submit="fetchAssets()">
+        <label>Search for asset(s):</label>
+        <input type="text" ng-model="searchBoxText" />
+        <button type="submit" value="Search">Search</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="clearfix">
+  </div>
+
+  <div class="row" ng-repeat="asset in r224.assets | orderBy:timestamp">
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="panel">
+        <div class="title">
+          <h4>{{asset.name}}</h4>
+        </div>
+        <div class="content">
+          <div class="content">
+            <b>Asset ID: </b> {{asset.assetId}}
+          </div>
+          <div class="content">
+            <b>Parent ID: </b> {{asset.parentId}}
+          </div>
+          <div class="content">
+            <b>Location: </b> {{asset.location.streetAddress}}  {{asset.location.locality}}  {{asset.location.country}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="panel">
+        <div class="title">
+          <h4>Set variables</h4>
+        </div>
+        <div class="content">
+          <div class="content">
+            <label id="newVariable">New variable</label>
+            <input type="text" id="newVariable" ng-model="newVariable"/>
+            <button ng-click="addNewVariable(newVariable)">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  var app = angular.module("myApp", []);
+
+  app.controller("requirement224", ['$http', '$scope', function($http, $scope){
+    $scope.searchBoxText = "";
+
+    var self = this;
+    self.assets = [];
+
+    //this function is used to get assets with filter params
+    function getAssets(filter){
+      var assetsUrl = '/api/assetmanagement/v3/assets' + '?filter=' + encodeURIComponent(filter);
+
+      var assetsReq = {
+        method: 'GET',
+        url: assetsUrl
+      }
+
+      $http(assetsReq).then(function(response){
+        if(response.data.hasOwnProperty('_embedded')){
+          self.assets = response.data._embedded.assets;
+        }
+      }).catch(function(err){
+        console.log("There was an err" + err, err.statusText);
+      })
+
+    }
+
+
+    $scope.fetchAssets = function(){
+      if($scope.searchBoxText){
+        var filterParams = '{"name":{"contains":{"value":"' + $scope.searchBoxText + '"}}}';
+
+        getAssets(filterParams);
+      }
+    }
+
+    //this scope function is to add new variable if customers need
+    $scope.addNewVariable = function(newVariable){
+      //DO SOMETHING
+    }
+
+
+  }])
+
+
+</script>
